@@ -17,11 +17,15 @@ const Signup = () => {
 		<>
 			<Input
 				placeholder='Email'
+				
 				fontSize={14}
 				type='email'
 				size={"sm"}
 				value={inputs.email}
 				onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
+				color={"black"}
+				border={"1px solid gray"}
+				_placeholder={{color: "gray"}}
 			/>
 			<Input
 				placeholder='Username'
@@ -30,6 +34,8 @@ const Signup = () => {
 				size={"sm"}
 				value={inputs.username}
 				onChange={(e) => setInputs({ ...inputs, username: e.target.value })}
+				border={"1px solid gray"}
+				_placeholder={{color: "gray"}}
 			/>
 			<Input
 				placeholder='Full Name'
@@ -38,6 +44,8 @@ const Signup = () => {
 				size={"sm"}
 				value={inputs.fullName}
 				onChange={(e) => setInputs({ ...inputs, fullName: e.target.value })}
+				border={"1px solid gray"}
+				_placeholder={{color: "gray"}}
 			/>
 			<InputGroup>
 				<Input
@@ -47,6 +55,8 @@ const Signup = () => {
 					value={inputs.password}
 					size={"sm"}
 					onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
+					border={"1px solid gray"}
+				_placeholder={{color: "gray"}}
 				/>
 				<InputRightElement h='full'>
 					<Button variant={"ghost"} size={"sm"} onClick={() => setShowPassword(!showPassword)}>

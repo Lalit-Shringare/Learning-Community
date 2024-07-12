@@ -3,7 +3,7 @@ import useAuthStore from "../store/authStore";
 import useUserProfileStore from "../store/userProfileStore";
 import useShowToast from "./useShowToast";
 import { firestore } from "../firebase/firebase";
-import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 
 const useFollowUser = (userId) => {
 	const [isUpdating, setIsUpdating] = useState(false);
@@ -18,6 +18,8 @@ const useFollowUser = (userId) => {
 		try {
 			const currentUserRef = doc(firestore, "users", authUser.uid);
 			const userToFollowOrUnfollorRef = doc(firestore, "users", userId);
+
+			// Update following and followers arrays
 			await updateDoc(currentUserRef, {
 				following: isFollowing ? arrayRemove(userId) : arrayUnion(userId),
 			});
@@ -26,8 +28,9 @@ const useFollowUser = (userId) => {
 				followers: isFollowing ? arrayRemove(authUser.uid) : arrayUnion(authUser.uid),
 			});
 
+			// Update authUser and userProfile state
 			if (isFollowing) {
-				// unfollow
+				// Unfollow
 				setAuthUser({
 					...authUser,
 					following: authUser.following.filter((uid) => uid !== userId),
@@ -46,19 +49,21 @@ const useFollowUser = (userId) => {
 					})
 				);
 				setIsFollowing(false);
+
+				// Remove the document in the Messages collection when unfollowing
+				const currentUserMessageRef = doc(firestore, `Messages/${authUser.uid}/message/${userId}`);
+				await deleteDoc(currentUserMessageRef);
 			} else {
-				// follow
+				// Follow
 				setAuthUser({
 					...authUser,
 					following: [...authUser.following, userId],
 				});
-
 				if (userProfile)
 					setUserProfile({
 						...userProfile,
 						followers: [...userProfile.followers, authUser.uid],
 					});
-
 				localStorage.setItem(
 					"user-info",
 					JSON.stringify({
@@ -67,6 +72,10 @@ const useFollowUser = (userId) => {
 					})
 				);
 				setIsFollowing(true);
+
+				// Add entry to Messages collection
+				const currentUserMessageRef = doc(firestore, `Messages/${authUser.uid}/message/${userId}`);
+				await setDoc(currentUserMessageRef, { userId });
 			}
 		} catch (error) {
 			showToast("Error", error.message, "error");

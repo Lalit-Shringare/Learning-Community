@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Input, InputGroup, InputRightElement, Text, useDisclosure } from "@chakra-ui/react";
 import { useRef, useState } from "react";
-import { CommentLogo, NotificationsLogo, UnlikeLogo } from "../../assets/constants";
+import { CommentLogo, LikeLogo, UnlikeLogo } from "../../assets/constants";
 import usePostComment from "../../hooks/usePostComment";
 import useAuthStore from "../../store/authStore";
 import useLikePost from "../../hooks/useLikePost";
@@ -24,7 +24,7 @@ const PostFooter = ({ post, isProfilePage, creatorProfile }) => {
 		<Box mb={10} marginTop={"auto"}>
 			<Flex alignItems={"center"} gap={4} w={"full"} pt={0} mb={2} mt={4}>
 				<Box onClick={handleLikePost} cursor={"pointer"} fontSize={18}>
-					{!isLiked ? <NotificationsLogo /> : <UnlikeLogo />}
+					{!isLiked ? <LikeLogo /> : <UnlikeLogo />}
 				</Box>
 
 				<Box cursor={"pointer"} fontSize={18} onClick={() => commentRef.current.focus()}>
@@ -65,6 +65,7 @@ const PostFooter = ({ post, isProfilePage, creatorProfile }) => {
 						<Input
 							variant={"flushed"}
 							placeholder={"Add a comment..."}
+							_placeholder={{ color: 'gray' }}
 							fontSize={14}
 							onChange={(e) => setComment(e.target.value)}
 							value={comment}
