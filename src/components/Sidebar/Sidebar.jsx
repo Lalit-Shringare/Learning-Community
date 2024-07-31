@@ -6,8 +6,9 @@ import { BiLogOut } from "react-icons/bi";
 import useLogout from "../../hooks/useLogout";
 import SidebarItems from "./SidebarItems";
 
-const Sidebar = () => {
+const Sidebar = ({totalUnreadCount}) => {
 	const { handleLogout, isLoggingOut } = useLogout();
+	//console.log(totalUnreadCount);
 	return (
 		<Box
 			height={"100vh"}
@@ -39,7 +40,7 @@ const Sidebar = () => {
 					<InstagramMobileLogo />
 				</Link>
 				<Flex direction={"column"} gap={5} cursor={"pointer"}>
-					<SidebarItems />
+					<SidebarItems totalUnreadCount={totalUnreadCount}/>
 				</Flex>
 
 				{/* LOGOUT */}

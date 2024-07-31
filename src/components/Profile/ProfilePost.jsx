@@ -47,7 +47,7 @@ const ProfilePost = ({ post }) => {
 			await deleteObject(imageRef);
 			const userRef = doc(firestore, "users", authUser.uid);
 			await deleteDoc(doc(firestore, "posts", post.id));
-
+ 
 			await updateDoc(userRef, {
 				posts: arrayRemove(post.id),
 			});
@@ -111,7 +111,7 @@ const ProfilePost = ({ post }) => {
 				<ModalOverlay />
 				<ModalContent>
 					<ModalCloseButton />
-					<ModalBody bg={"black"} pb={5}>
+					<ModalBody bg={"white"} pb={5}>
 						<Flex
 							gap='4'
 							w={{ base: "90%", sm: "70%", md: "full" }}
@@ -123,7 +123,7 @@ const ProfilePost = ({ post }) => {
 								borderRadius={4}
 								overflow={"hidden"}
 								border={"1px solid"}
-								borderColor={"whiteAlpha.300"}
+								borderColor={"gray.300"}
 								flex={1.5}
 								justifyContent={"center"}
 								alignItems={"center"}
@@ -143,7 +143,7 @@ const ProfilePost = ({ post }) => {
 										<Button
 											size={"sm"}
 											bg={"transparent"}
-											_hover={{ bg: "whiteAlpha.300", color: "red.600" }}
+											_hover={{ bg: "gray.300", color: "red.600" }}
 											borderRadius={4}
 											p={1}
 											onClick={handleDeletePost}

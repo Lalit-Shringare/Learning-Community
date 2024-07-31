@@ -1,18 +1,23 @@
 import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Box, Flex, Avatar, Text, Input, Button, VStack, HStack, Center, IconButton, Spinner } from "@chakra-ui/react";
-import { PhoneIcon } from "@chakra-ui/icons";
+import { Link as RouterLink } from "react-router-dom";
+import { Box, Flex, Avatar, Text, Input, Button, VStack, HStack, Center, IconButton, Spinner, useMediaQuery, Link, useDisclosure } from "@chakra-ui/react";
+import { PhoneIcon, ArrowBackIcon } from "@chakra-ui/icons";
 import { ProfileContext } from "./ProfileContext";
 import { firestore } from "../../firebase/firebase";
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, writeBatch } from "firebase/firestore";
 import useAuthStore from "../../store/authStore";
+import ReactPlayer from 'react-player';
+import ReelContainer from "./ReelContainer";
 
-const MessageArea = ({ className }) => {
+const MessageArea = ({ className, selectedProfile, setSelectedProfile }) => {
   const { data } = useContext(ProfileContext);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const authUser = useAuthStore((state) => state.user);
+  const [isLargerThan768] = useMediaQuery("(min-width: 768px)");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState(null);
 
   useEffect(() => {
     if (!data || !authUser) return;
@@ -21,7 +26,6 @@ const MessageArea = ({ className }) => {
 
     return () => unsubscribe();
   }, [data, authUser]);
-
 
   const listenToMessages = () => {
     setIsLoading(true);
@@ -37,7 +41,6 @@ const MessageArea = ({ className }) => {
       setIsLoading(false);
       setMessages(newMessages);
 
-      // Mark received messages as seen
       const batch = writeBatch(firestore);
       snapshot.docs.forEach((doc) => {
         const messageData = doc.data();
@@ -55,7 +58,14 @@ const MessageArea = ({ className }) => {
   const handleSendMessage = async () => {
     if (message.trim() !== "") {
       const timestamp = serverTimestamp();
-      const messageObject = {
+      const senderMessageObject = {
+        message: message,
+        time: timestamp,
+        to: data.uid,
+        from: authUser.uid,
+        isSeen: true,
+      };
+      const receiverMessageObject = {
         message: message,
         time: timestamp,
         to: data.uid,
@@ -64,29 +74,111 @@ const MessageArea = ({ className }) => {
       };
 
       try {
-        // Add message to both sender's and receiver's collections
-        await addDoc(collection(firestore, `Messages/${authUser.uid}/message/${data.uid}/messages`), messageObject);
-        await addDoc(collection(firestore, `Messages/${data.uid}/message/${authUser.uid}/messages`), messageObject);
+        await addDoc(collection(firestore, `Messages/${authUser.uid}/message/${data.uid}/messages`), senderMessageObject);
+        await addDoc(collection(firestore, `Messages/${data.uid}/message/${authUser.uid}/messages`), receiverMessageObject);
 
-        setMessage(""); // Clear input field after sending message
+        setMessage("");
       } catch (error) {
         console.error("Error sending message:", error);
       }
     }
   };
 
+  const renderMessageContent = (msg) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const firebaseVideoUrlRegex = /^https:\/\/firebasestorage\.googleapis\.com/;
+
+    if (urlRegex.test(msg.message)) {
+      const parts = msg.message.split(urlRegex);
+      return parts.map((part, index) => {
+        if (firebaseVideoUrlRegex.test(part)) {
+          return (
+            <Box key={index} w="100%" maxW="500px" borderRadius="md" overflow="hidden" mt={2} mb={2}>
+              <ReactPlayer 
+                loop
+                width="100%" 
+                url={part}
+                onClick={() => {
+                  setSelectedVideoUrl(part);
+                  onOpen();
+                }}
+                style={{ borderRadius: "10px" }}
+              />
+            </Box>
+          );
+        } else if (urlRegex.test(part)) {
+          return (
+            <Link key={index} href={part} color="teal.500" isExternal>
+              {part}
+            </Link>
+          );
+        } else {
+          return part;
+        }
+      });
+    }
+    return msg.message;
+  };
+
   return (
-    <Box className={className} p={4} bg="gray.100" borderRadius="md" h="100%" w="100%" maxW="70%" mx="auto">
+    <Box
+      className={className}
+      p={4}
+      bg="gray.100"
+      borderRadius="md"
+      h="100%"
+      w={{ base: "100%", md: "70%" }}
+      mx="auto"
+      display={selectedProfile ? "block" : { base: "none", md: "block" }}
+    >
       {data ? (
         <Flex direction="column" h="100%">
-          <Flex align="center" w="100%" bg="gray.100" p={4} borderTopRadius="xl" boxShadow="2xl" borderWidth="1px" borderColor="cyan">
-            <Link to={`/${data.username}`}>
+          <Flex
+            align="center"
+            w="100%"
+            bg="gray.100"
+            p={4}
+            borderTopRadius="xl"
+            boxShadow="0px 0px 4px cyan"
+            borderWidth="1px"
+          >
+            {!isLargerThan768 && (
+              <IconButton
+                aria-label="Back"
+                icon={<ArrowBackIcon />}
+                onClick={() => setSelectedProfile(null)}
+                mr={3}
+                color={"black"}
+              />
+            )}
+            <RouterLink to={`/${data.username}`}>
               <Avatar src={data.profilePicURL} name={data.username} size="md" mr={3} />
-            </Link>
+            </RouterLink>
             <Text fontWeight="bold">{data.username}</Text>
             <IconButton aria-label="Call" icon={<PhoneIcon />} ml="auto" colorScheme="teal" />
           </Flex>
-          <Flex flex="1" direction="column-reverse" overflowY="auto" maxH="77vh" p={4} bg="white" borderRadius="md" boxShadow="sm">
+          <Flex
+            flex="1"
+            direction="column-reverse"
+            overflowY="auto"
+            maxH="77vh"
+            p={4}
+            bg="white"
+            borderRadius="md"
+            boxShadow="sm"
+            sx={{
+              "::-webkit-scrollbar": {
+                width: "5px",
+              },
+              "::-webkit-scrollbar-track": {
+                bg: "gray.100",
+              },
+              "::-webkit-scrollbar-thumb": {
+                bg: "gray.500",
+                borderRadius: "8px",
+              },
+            }}
+          >
             <VStack spacing={2} align="stretch">
               {isLoading ? (
                 <Center h="100%">
@@ -103,7 +195,7 @@ const MessageArea = ({ className }) => {
                     maxWidth="70%"
                     textAlign={msg.from === authUser.uid ? "right" : "left"}
                   >
-                    {msg.message}
+                    {renderMessageContent(msg)}
                   </Box>
                 ))
               )}
@@ -112,22 +204,26 @@ const MessageArea = ({ className }) => {
           <HStack w="100%" spacing={3} mt={3}>
             <Input
               bg="white"
-              placeholder="Type your message..."
-              _placeholder={{ color: 'black' }}
+              placeholder="Type a message"
+              _placeholder={{ color: "gray" }}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              borderColor="cyan.700"
-              borderWidth="1px"
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              boxShadow={"0px 0px 4px cyan"}
             />
-            <Button colorScheme="blue" onClick={handleSendMessage}>
+            <Button colorScheme="teal" onClick={handleSendMessage}>
               Send
             </Button>
           </HStack>
         </Flex>
       ) : (
         <Center h="100%">
-          <Text>Select a user to start chatting</Text>
+          <Text fontSize="xl">Select a profile to start chatting</Text>
         </Center>
+      )}
+
+      {selectedVideoUrl && (
+        <ReelContainer isOpen={isOpen} onClose={onClose} url={selectedVideoUrl} />
       )}
     </Box>
   );

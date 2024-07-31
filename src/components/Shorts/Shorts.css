@@ -5,3 +5,29 @@
     display: flex;
     justify-content: center;
 }
+.slide-up {
+   animation: slideDown 0.5s forwards; 
+  }
+  
+  .slide-down {
+    animation: slideUp 0.5s forwards;
+  }
+  
+  @keyframes slideUp {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
+  
+  @keyframes slideDown {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+  

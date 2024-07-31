@@ -18,8 +18,8 @@ const Comment = ({ comment }) => {
 						<Text fontWeight={"bold"} fontSize={12}>
 							{userProfile.username}
 						</Text>
-					</Link>
-					<Text fontSize={14}>{comment.comment}</Text>
+					</Link><br/>
+					<Text fontSize={12}>{comment.comment}</Text>
 				</Flex>
 				<Text fontSize={12} color={"gray"}>
 					{timeAgo(comment.createdAt)}

@@ -1,0 +1,27 @@
+import { useState } from "react";
+import useShowToast from "./useShowToast";
+
+const usePreviewVideo = () => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const showToast = useShowToast();
+  const maxFileSizeInBytes = 20 * 1024 * 1024; // 20 MB
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("video/")) {
+      if (file.size > maxFileSizeInBytes) {
+        showToast("Error", "File size must be less than 20MB", "error");
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file); // Store the File object itself
+    } else {
+      showToast("Error", "Please select a video file", "error");
+      setSelectedFile(null);
+    }
+  };
+
+  return { selectedFile, handleVideoChange, setSelectedFile };
+};
+
+export default usePreviewVideo;

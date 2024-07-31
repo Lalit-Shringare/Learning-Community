@@ -1,52 +1,51 @@
 import './Message.css';
-import React, { useState } from 'react';
-import { Input, Spinner, Center } from '@chakra-ui/react';
-import { Profile } from './Profile.jsx';
-import { useGetFollowers } from '../../hooks/useGetFollowers.js';
+import { useState, useEffect } from 'react';
+import { Input, Spinner, Center, Box } from '@chakra-ui/react';
+import { Profile } from './Profile';
 
-export const MessageExp = () => {
-  const { isLoading, followers } = useGetFollowers();
+export const MessageExp = ({ followers, isLoading, setSelectedProfile }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProfiles, setFilteredProfiles] = useState([]);
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    // Filter profiles based on the search term
-    if (value.trim() === "") {
+  useEffect(() => { 
+    if (searchTerm.trim() === "") {
       setFilteredProfiles([]);
     } else {
       const filtered = followers.filter((profile) =>
-        profile.username.toLowerCase().includes(value.toLowerCase())
+        profile.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredProfiles(filtered);
     }
-  };
+  }, [searchTerm, followers]);
 
   // Determine which profiles to display
   const profilesToDisplay = searchTerm.trim() === "" ? followers : filteredProfiles;
 
   return (
-    <div className="explore-parent">
+    <Box className="explore-parent" sx={{
+        '::-webkit-scrollbar': {
+          width: '5px',
+        },
+        '::-webkit-scrollbar-track': {
+          bg: 'gray.100',
+        },
+        '::-webkit-scrollbar-thumb': {
+          bg: 'gray.500',
+          borderRadius: '8px',
+        },
+      }}>
       <Input
         bg={"gray.100"}
         placeholder='Search'
         _placeholder={{ color: "gray" }}
         type='search'
         value={searchTerm}
-        onChange={handleSearchChange}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        marginBottom={'1rem'}
       />
       {
-        isLoading ? (
-          <Center h="100%">
-            <Spinner size="xl" />
-          </Center>
-        ) : (
-          <Profile profiles={profilesToDisplay} />
-        )
+        <Profile profiles={profilesToDisplay} setSelectedProfile={setSelectedProfile} />
       }
-    </div>
+    </Box>
   );
 };
