@@ -17,6 +17,8 @@ const Login = () => {
 				size={"sm"}
 				value={inputs.email}
 				onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
+				_placeholder={{color:'gray.300'}}
+				bg={'gray.100'}
 			/>
 			<Input
 				placeholder='Password'
@@ -25,6 +27,8 @@ const Login = () => {
 				type='password'
 				value={inputs.password}
 				onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
+				_placeholder={{color:'gray.300'}}
+				bg={'gray.100'}
 			/>
 			{error && (
 				<Alert status='error' fontSize={13} p={2} borderRadius={4}>
