@@ -13,7 +13,7 @@ import ReelBottom from "./ReelBottom";
 import FollowerList from "../Profile/FollowerList";
 import useUserProfileStore from "../../store/userProfileStore";
 import { Profile } from "../Message/Profile";
-import { ShareProfiles } from "./shareProfiles";
+import { ShareProfiles } from "./ShareProfiles";
 
 function Reel({ followers, isLoading, }) {
   const [videos, setVideos] = useState([]);
