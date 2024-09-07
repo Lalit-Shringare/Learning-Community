@@ -1,4 +1,4 @@
-# Fullstack Instagram Clone Tutorial
+# Community App
 
 ### Built With React, Firebase && Chakra UI
 
